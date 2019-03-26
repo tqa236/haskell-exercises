@@ -1,7 +1,5 @@
 module W1 where
 
-import           Data.List
-import           Data.Maybe (fromMaybe)
 -- Week 1:
 --   * defining functions
 --   * basic expressions
@@ -11,29 +9,25 @@ import           Data.Maybe (fromMaybe)
 -- Ex 1: define variables one, two and three. They should all have
 -- type Int and values 1, 2 and 3. This exercise has no tests.
 
-one = 1
-two = 2
-three = 3
-
 -- Ex 2: define the function double of type Integer->Integer. Double
 -- should take one argument and return it multiplied by two.
 
 double :: Integer -> Integer
-double x = 2 * x
+double x = 2*x
 
 -- Ex 3: define the function quadruple that uses the function double
 -- from the previous exercise to return its argument multiplied by
 -- four.
 
 quadruple :: Integer -> Integer
-quadruple x = double $ double x
+quadruple x = double (double x)
 
 -- Ex 4: define the function poly2. It should take four arguments of
 -- type Double, a, b, c, and x and return a*x^2+b*x+c. Give poly2 a
 -- type signature, i.e. poly2 :: something.
 
 poly2 :: Double -> Double -> Double -> Double -> Double
-poly2 a b c x = a * x * x + b * x + c
+poly2 a b c x = a*x*x+b*x+c
 
 -- Ex 5: define the function eeny that returns "eeny" for even inputs
 -- and "meeny" for odd inputs.
@@ -41,9 +35,7 @@ poly2 a b c x = a * x * x + b * x + c
 -- Ps. have a look at the built in function "even"
 
 eeny :: Integer -> String
-eeny n
-    | even n = "eeny"
-    | otherwise = "meeny"
+eeny i = if even i then "eeny" else "meeny"
 
 -- Ex 6: fizzbuzz! Define the a function fizzbuzz that returns "Fizz"
 -- for numbers divisible by 3, "Buzz" for numbers divisible by 5, and
@@ -53,11 +45,14 @@ eeny n
 -- You can use the function mod to compute modulo.
 
 fizzbuzz :: Integer -> String
-fizzbuzz n
-    | n `mod` 15 == 0 = "FizzBuzz"
-    | n `mod` 3 == 0 = "Fizz"
-    | n `mod` 5 == 0 = "Buzz"
-    | otherwise = ""
+fizzbuzz n = if divides 3 n && divides 5 n
+             then "FizzBuzz"
+             else if divides 3 n
+                  then "Fizz"
+                  else if divides 5 n
+                       then "Buzz"
+                       else ""
+  where divides k n = mod n k == 0
 
 -- Ex 7: define a function isZero that returns True if it is given an
 -- Integer that is 0, and False otherwise. Give isZero a type signature.
@@ -67,7 +62,8 @@ fizzbuzz n
 -- Ps. the type of booleans in haskell is Bool
 
 isZero :: Integer -> Bool
-isZero n = n == 0
+isZero 0 = True
+isZero _ = False
 
 -- Ex 8: implement using recursion a function sumTo such that
 --   sumTo n
@@ -75,14 +71,14 @@ isZero n = n == 0
 
 sumTo :: Integer -> Integer
 sumTo 1 = 1
-sumTo n = n + sumTo (n - 1)
+sumTo n = n + sumTo (n-1)
 
 -- Ex 9: power n k should compute n to the power k (i.e. n^k)
 -- Use recursion.
 
 power :: Integer -> Integer -> Integer
 power n 0 = 1
-power n k = n * power n (k - 1)
+power n k = n * power n (k-1)
 
 -- Ex 10: ilog2 n should be the number of times you can halve the
 -- integer n (rounding down) before you get 1.
@@ -92,7 +88,7 @@ power n k = n * power n (k - 1)
 
 ilog2 :: Integer -> Integer
 ilog2 1 = 0
-ilog2 n = 1 + ilog2 (n `div` 2)
+ilog2 n = 1 + ilog2 (div n 2)
 
 -- Ex 11: compute binomial coefficients using recursion. Binomial
 -- coefficients are defined by the following equations:
@@ -106,7 +102,7 @@ ilog2 n = 1 + ilog2 (n `div` 2)
 binomial :: Integer -> Integer -> Integer
 binomial n 0 = 1
 binomial 0 k = 0
-binomial n k = binomial (n - 1) k + binomial (n - 1) (k - 1)
+binomial n k = binomial (n-1) k + binomial (n-1) (k-1)
 
 -- Ex 12: The tribonacci numbers are defined by the equations
 --
@@ -131,11 +127,10 @@ tribonacci' a b c n = tribonacci' b c (a+b+c) (n-1)
 -- common divisor: http://en.wikipedia.org/wiki/Euclidean_algorithm
 
 myGcd :: Integer -> Integer -> Integer
-myGcd a b
-    | a * b == 0 = 0
-    | a `mod` b == 0 = b
-    | a > b = myGcd (a `mod` b) b
-    | otherwise = myGcd b a
+myGcd 0 y = y
+myGcd x y = if x<y
+            then myGcd y x
+            else myGcd (x-y) y
 
 -- Ex 14: The Haskell Prelude (standard library) defines the type
 -- Ordering with values LT, GT and EQ. You try out Ordering by
@@ -154,10 +149,13 @@ myGcd a b
 -- 2. Within even and odd numbers the ordering is normal
 
 funnyCompare :: Int -> Int -> Ordering
-funnyCompare a b
-    | even a && odd b = LT
-    | odd a && even b = GT
-    | otherwise = compare a b
+funnyCompare x y = if even x
+                   then if even y
+                        then compare x y
+                        else LT
+                   else if even y
+                        then GT
+                        else compare x y
 
 -- Ex 15: Implement the function funnyMin that returns the minimum of
 -- its two arguments, according to the ordering implemented by
@@ -168,9 +166,9 @@ funnyCompare a b
 -- expression or define a helper function.
 
 funnyMin :: Int -> Int -> Int
-funnyMin a b
-    | funnyCompare a b /= GT = a
-    | otherwise = b
+funnyMin x y = helper (funnyCompare x y) x y
+  where helper LT x _ = x
+        helper _  _ y = y
 
 -- Ex 16: implement the recursive function pyramid that returns
 -- strings like this:
@@ -186,11 +184,10 @@ funnyMin a b
 -- * you'll need a (recursive) helper function
 
 pyramid :: Integer -> String
-pyramid 0 = "0"
-pyramid n = makePyramid [0..n] ++ "," ++ makePyramid (reverse [0..n - 1])
+pyramid n = helper 0 n
 
-makePyramid :: [Integer] -> String
-makePyramid numbers = intercalate "," (map show numbers)
+helper k 0 = show k
+helper k n = show k ++ "," ++ helper (k+1) (n-1) ++ "," ++ show k
 
 -- Ex 17: implement the function smallestDivisor that returns the
 -- smallest number (greater than 1) that divides the given number.
@@ -205,7 +202,12 @@ makePyramid numbers = intercalate "," (map show numbers)
 -- remember this in the next exercise!
 
 smallestDivisor :: Integer -> Integer
-smallestDivisor n = fromMaybe n (find (\x -> n `mod` x == 0) [2..])
+smallestDivisor n = smallestDivisor' 2 n
+
+smallestDivisor' k n =
+  if mod n k == 0
+  then k
+  else smallestDivisor' (k+1) n
 
 -- Ex 18: implement a function isPrime that checks if the given number
 -- is a prime number. Use the function smallestDivisor.
@@ -213,13 +215,16 @@ smallestDivisor n = fromMaybe n (find (\x -> n `mod` x == 0) [2..])
 -- Ps. 0 and 1 are not prime numbers
 
 isPrime :: Integer -> Bool
-isPrime n
-    | n < 2 = False
-    | otherwise = smallestDivisor n == n
+isPrime 0 = False
+isPrime 1 = False
+isPrime i = smallestDivisor i == i
 
 -- Ex 19: implement a function nextPrime that returns the first prime
 -- number that comes after the given number. Use the function isPrime
 -- you just defined.
 
 nextPrime :: Integer -> Integer
-nextPrime n = fromMaybe n (find isPrime [n+1..])
+nextPrime n =
+  if isPrime (n+1)
+  then (n+1)
+  else nextPrime (n+1)
